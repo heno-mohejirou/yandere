@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <link rel="stylesheet" href="test.css">
+    <!-- <link rel="stylesheet" href="../static/test.css"> -->
+
+    <link rel="icon" href="data:,">
+    <title>Moodle学習支援センター - サインイン -</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const startBtn = document.getElementById("startBtn");
+            const emailInput = document.querySelector('input[name="username"]');
+            const policyCheck = document.querySelector(".checkboxItem input");
+
+            function validateForm() {
+                const emailFilled = emailInput.value.trim() !== "";
+                const policyChecked = policyCheck.checked;
+                startBtn.disabled = !(emailFilled && policyChecked);
+            }
+
+            emailInput.addEventListener("input", validateForm);
+            policyCheck.addEventListener("change", validateForm);
+
+            validateForm();
+        });
+    </script>
+
+    <header>
+        <a class="logo" href="/">Moodle学習支援センター</a>
+        <div class="row">
+            <a href="/term" class="menu">利用規約</a>
+            <a href="/policy" class="menu">プライバシーポリシー</a>
+            <a href="/help" class="menu">ヘルプ</a>
+        </div>
+    </header>
+
+    <main>
+        <form class="content" method="POST" action="/run" id="testForm">
+        <h1 style="text-align: center; margin-bottom: 40px; color: var(--text-main);">サインイン</h1>
+
+            <div class="stepper">
+                <div class="step current">
+                    <div class="circle"></div>
+                    <div class="label">送信</div>
+                </div>
+
+                <div class="line"></div>
+
+                <div class="step">
+                    <div class="circle"></div>
+                    <div class="label">入力</div>
+                </div>
+            </div>
+
+            <div class="note" style="margin-bottom: 30px;">
+                学校メールアドレスを入力してワンタイムパスワードを受け取ります
+            </div>
+
+            <div class="Form-Item">
+                <p class="Form-Item-Label">
+                    <span class="Form-Item-Label-Required">必須</span>メールアドレス
+                </p>
+                <input type="text" name="username" class="Form-Item-Input" placeholder="例: example@school.com" />
+            </div>
+
+            <label class="checkboxItem">
+                <input type="checkbox" name="policy_agree" value="選択肢1" class="checkbox" checked />
+                プライバシーポリシーに同意する
+            </label>
+
+            <div class="button-wrapper">
+                <button type="submit" class="Form-Btn" id="startBtn">
+                    メール送信
+                </button>
+            </div>
+
+        </form>
+        
+        <script>
+            // ========================================
+            // Supabase設定
+            // ========================================
+        
+            const SUPABASE_URL = "https://mwollfzzlbwxibtjdzmn.supabase.co";
+            const SUPABASE_ANON_KEY = "sb_publishable__SYKhFuvfDcsHGITZ4wEIA_LZVOx_kX";
+        
+            const supabaseClient = window.supabase.createClient(
+                SUPABASE_URL,
+                SUPABASE_ANON_KEY
+            );
+        
+        
+            // ========================================
+            // フォーム送信
+            // ========================================
+        
+            document.getElementById("testForm").addEventListener("submit", async function(e) {
+        
+                e.preventDefault();
+        
+                const email = document
+                    .querySelector('input[name="username"]')
+                    .value
+                    .trim();
+        
+                const policyChecked = document.querySelector(
+                    'input[name="policy_agree"]'
+                ).checked;
+        
+        
+                // ----------------------------------------
+                // 入力チェック
+                // ----------------------------------------
+        
+                if (!email) {
+                    alert("メールアドレスを入力してください。");
+                    return;
+                }
+        
+                if (!policyChecked) {
+                    alert("プライバシーポリシーに同意してください。");
+                    return;
+                }
+        
+        
+                // ----------------------------------------
+                // 学校メールアドレスか確認
+                // ----------------------------------------
+        
+                // 例：
+                // if (!email.endsWith("@school.com")) {
+                //     alert("学校メールアドレスを入力してください。");
+                //     return;
+                // }
+        
+        
+                const startBtn = document.getElementById("startBtn");
+        
+                startBtn.disabled = true;
+                startBtn.textContent = "送信中...";
+        
+        
+                try {
+        
+                    // ----------------------------------------
+                    // Supabase AuthからOTPを送信
+                    // ----------------------------------------
+        
+                    const { data, error } =
+                        await supabaseClient.auth.signInWithOtp({
+                            email: email,
+        
+                            options: {
+                                shouldCreateUser: true
+                            }
+                        });
+        
+        
+                    if (error) {
+                        console.error("OTP送信エラー:", error);
+        
+                        alert(
+                            "認証コードの送信に失敗しました。\n\n" +
+                            error.message
+                        );
+        
+                        startBtn.disabled = false;
+                        startBtn.textContent = "メール送信";
+        
+                        return;
+                    }
+        
+        
+                    // ----------------------------------------
+                    // OTP送信成功
+                    // ----------------------------------------
+        
+                    console.log("OTP送信成功:", data);
+        
+                    // メールアドレスを次のページに渡す
+                    location.href =
+                        "/otp.html?email=" +
+                        encodeURIComponent(email);
+        
+        
+                } catch (error) {
+        
+                    console.error(error);
+        
+                    alert(
+                        "通信エラーが発生しました。\n\n" +
+                        error.message
+                    );
+        
+                    startBtn.disabled = false;
+                    startBtn.textContent = "メール送信";
+                }
+        
+            });
+        </script>
+    </main>
+
+    <footer>
+        <div class="row">
+            <a href="/term" class="menu">利用規約</a>
+            <a href="/policy" class="menu">プライバシーポリシー</a>
+            <a href="/help" class="menu">ヘルプ</a>
+            <p>(C) Elecitell 2026 ver3.0</p>
+        </div>
+    </footer>
+
+</body>
+
+</html>
