@@ -1,225 +1,62 @@
 <!DOCTYPE html>
-<html>
-    
+<html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    
-    <link rel="stylesheet" href="test.css">
-    <!-- <link rel="stylesheet" href="../static/test.css"> -->
-
-    <link rel="icon" href="data:,">
-    <title>Moodle学習支援センター - サインイン -</title>
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>メンヘラとヤンデレの推移</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
+  <header class="header">
+    <h1>メンヘラとヤンデレの推移</h1>
+    <p class="lead">「メンヘラ」と「ヤンデレ」という言葉への関心が、この10年でどう変わってきたかを2つのデータで比べます。</p>
+  </header>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
+  <main class="container">
 
-            const startBtn = document.getElementById("startBtn");
-            const emailInput = document.querySelector('input[name="username"]');
-            const policyCheck = document.querySelector(".checkboxItem input");
-
-            function validateForm() {
-                const emailFilled = emailInput.value.trim() !== "";
-                const policyChecked = policyCheck.checked;
-                startBtn.disabled = !(emailFilled && policyChecked);
-            }
-
-            emailInput.addEventListener("input", validateForm);
-            policyCheck.addEventListener("change", validateForm);
-
-            validateForm();
-        });
-    </script>
-
-    <header>
-        <a class="logo" href="/">Moodle学習支援センター</a>
-        <div class="row">
-            <a href="/term" class="menu">利用規約</a>
-            <a href="/policy" class="menu">プライバシーポリシー</a>
-            <a href="/help" class="menu">ヘルプ</a>
+    <section class="card">
+      <h2>① 日本語版Wikipediaの記事ページビュー(2016〜2025年)</h2>
+      <figure>
+        <div class="chart">
+          <img src="images/wikipedia.png" alt="日本語版Wikipediaにおけるメンヘラ記事とヤンデレ記事の年別ページビュー推移">
         </div>
-    </header>
+        <figcaption>出典:Wikimedia Pageviews API(ja.wikipedia)。各年は暦年合計。</figcaption>
+      </figure>
+      <div class="note">
+        <h3>グラフの見方</h3>
+        <ul>
+          <li><span class="dot blue"></span>青が「メンヘラ」、<span class="dot orange"></span>橙が「ヤンデレ」の記事ページビュー(年間)です。</li>
+          <li>2016年はヤンデレ(268,239)が圧倒的で、メンヘラは2,872でした。</li>
+          <li>2019年に両者はほぼ同じ水準(約16.5万)で並びます。</li>
+          <li>2022年以降はメンヘラが増え続け、2025年は161,888に。一方ヤンデレは減少し、41,572になりました。</li>
+          <li>ページビューは「言葉の意味を調べた回数」であり、使われた回数ではありません。</li>
+        </ul>
+      </div>
+    </section>
 
-    <main>
-        <form class="content" method="POST" action="/run" id="testForm">
-        <h1 style="text-align: center; margin-bottom: 40px; color: var(--text-main);">サインイン</h1>
-
-            <div class="stepper">
-                <div class="step current">
-                    <div class="circle"></div>
-                    <div class="label">送信</div>
-                </div>
-
-                <div class="line"></div>
-
-                <div class="step">
-                    <div class="circle"></div>
-                    <div class="label">入力</div>
-                </div>
-            </div>
-
-            <div class="note" style="margin-bottom: 30px;">
-                学校メールアドレスを入力してワンタイムパスワードを受け取ります
-            </div>
-
-            <div class="Form-Item">
-                <p class="Form-Item-Label">
-                    <span class="Form-Item-Label-Required">必須</span>メールアドレス
-                </p>
-                <input type="text" name="username" class="Form-Item-Input" placeholder="例: example@school.com" />
-            </div>
-
-            <label class="checkboxItem">
-                <input type="checkbox" name="policy_agree" value="選択肢1" class="checkbox" checked />
-                プライバシーポリシーに同意する
-            </label>
-
-            <div class="button-wrapper">
-                <button type="submit" class="Form-Btn" id="startBtn">
-                    メール送信
-                </button>
-            </div>
-
-        </form>
-        
-        <script>
-            // ========================================
-            // Supabase設定
-            // ========================================
-        
-            const SUPABASE_URL = "https://mwollfzzlbwxibtjdzmn.supabase.co";
-            const SUPABASE_ANON_KEY = "sb_publishable__SYKhFuvfDcsHGITZ4wEIA_LZVOx_kX";
-        
-            const supabaseClient = window.supabase.createClient(
-                SUPABASE_URL,
-                SUPABASE_ANON_KEY
-            );
-        
-        
-            // ========================================
-            // フォーム送信
-            // ========================================
-        
-            document.getElementById("testForm").addEventListener("submit", async function(e) {
-        
-                e.preventDefault();
-        
-                const email = document
-                    .querySelector('input[name="username"]')
-                    .value
-                    .trim();
-        
-                const policyChecked = document.querySelector(
-                    'input[name="policy_agree"]'
-                ).checked;
-        
-        
-                // ----------------------------------------
-                // 入力チェック
-                // ----------------------------------------
-        
-                if (!email) {
-                    alert("メールアドレスを入力してください。");
-                    return;
-                }
-        
-                if (!policyChecked) {
-                    alert("プライバシーポリシーに同意してください。");
-                    return;
-                }
-        
-        
-                // ----------------------------------------
-                // 学校メールアドレスか確認
-                // ----------------------------------------
-        
-                // 例：
-                // if (!email.endsWith("@school.com")) {
-                //     alert("学校メールアドレスを入力してください。");
-                //     return;
-                // }
-        
-        
-                const startBtn = document.getElementById("startBtn");
-        
-                startBtn.disabled = true;
-                startBtn.textContent = "送信中...";
-        
-        
-                try {
-        
-                    // ----------------------------------------
-                    // Supabase AuthからOTPを送信
-                    // ----------------------------------------
-        
-                    const { data, error } =
-                        await supabaseClient.auth.signInWithOtp({
-                            email: email,
-        
-                            options: {
-                                shouldCreateUser: true
-                            }
-                        });
-        
-        
-                    if (error) {
-                        console.error("OTP送信エラー:", error);
-        
-                        alert(
-                            "認証コードの送信に失敗しました。\n\n" +
-                            error.message
-                        );
-        
-                        startBtn.disabled = false;
-                        startBtn.textContent = "メール送信";
-        
-                        return;
-                    }
-        
-        
-                    // ----------------------------------------
-                    // OTP送信成功
-                    // ----------------------------------------
-        
-                    console.log("OTP送信成功:", data);
-        
-                    // メールアドレスを次のページに渡す
-                    location.href =
-                        "/otp.html?email=" +
-                        encodeURIComponent(email);
-        
-        
-                } catch (error) {
-        
-                    console.error(error);
-        
-                    alert(
-                        "通信エラーが発生しました。\n\n" +
-                        error.message
-                    );
-        
-                    startBtn.disabled = false;
-                    startBtn.textContent = "メール送信";
-                }
-        
-            });
-        </script>
-    </main>
-
-    <footer>
-        <div class="row">
-            <a href="/term" class="menu">利用規約</a>
-            <a href="/policy" class="menu">プライバシーポリシー</a>
-            <a href="/help" class="menu">ヘルプ</a>
-            <p>(C) Elecitell 2026 ver3.0</p>
+    <section class="card">
+      <h2>② YouTubeの年別検索結果数(公開年別)</h2>
+      <figure>
+        <div class="chart">
+          <img src="images/youtube.png" alt="YouTubeにおけるメンヘラとヤンデレの公開年別の推定検索結果数">
         </div>
-    </footer>
+        <figcaption>縦軸は推定検索結果数(1e6 = 100万件)、横軸は動画の公開年。</figcaption>
+      </figure>
+      <div class="note">
+        <h3>グラフの見方</h3>
+        <ul>
+          <li>各年に公開された動画のうち、キーワードに該当するものの推定件数です。</li>
+          <li>2015年ごろまでは橙(ヤンデレ)が先行し、2016〜2017年に大きく伸びました。</li>
+          <li>2018年に一度並び、その後は青(メンヘラ)が2021年ごろまで上回ります。</li>
+          <li>2022年以降は横ばいで、橙が100万、青が約85万で頭打ちです。これは推定値の上限によるもので、実際の動画数が止まったとは限りません。</li>
+        </ul>
+      </div>
+    </section>
 
+  </main>
+
+  <footer class="footer">
+    <p>© メンヘラとヤンデレの推移</p>
+  </footer>
 </body>
-
 </html>
